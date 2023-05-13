@@ -4,9 +4,9 @@
 
 yelpcamp github repo.
 
-npm, express, views and view engine, and home route.
+npm, express, views and view engine, and home route.  [done]
 
- models and scheema mongo
+ models and scheema mongo   []
  seeding documents
  campground index 
  campground show
