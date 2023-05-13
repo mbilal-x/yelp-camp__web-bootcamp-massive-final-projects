@@ -8,3 +8,8 @@ got distracted for a bit by a few things:
 - procrastination on side contents
 
 I start again today. Github would keep track of streak.
+
+
+
+This is not fun to work on as I have alot of loopholes in my understanding.
+should have practiced each seperate concept on a seperate tiny project before integrating it into something this big and complicated. 
