@@ -34,7 +34,7 @@ app.get('/makecampground', async (req, res)=>{
         title: "My Backyard"
     })
     await camp.save()
-    res.send("camp")
+    res.send(camp)
 })
 
 app.listen(5000 , ()=>{
