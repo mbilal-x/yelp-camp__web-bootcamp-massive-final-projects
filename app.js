@@ -2,10 +2,13 @@ const express = require('express')
 const path = require('path')
 const mongoose = require('mongoose')
 const ejs = require('ejs')
+const bodyParser = require('body-parser')
+const methodOverride = require('method-override')
+const ejsMate = require('ejs-mate')
+
 const Campground = require('./models/campground')
 const campground = require('./models/campground')
-const bodyParser = require('body-parser');
-const methodOverride = require('method-override')
+
 
 // express app 
 const app = express()
@@ -32,7 +35,7 @@ app.use(express.urlencoded({extended: true}))
 
 app.use(bodyParser.json());
 app.use(methodOverride('_method'))
-
+app.engine('ejs', ejsMate);
 
 app.get('/', (req, res)=>{
     res.render('index')

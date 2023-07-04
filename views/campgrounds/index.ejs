@@ -1,19 +1,36 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>All campgrounds</title>
-</head>
-<body>
-    <h1>All Campgrounds</h1>
-    <ul>
-    <% for(let campground of campgrounds) { %>
-        <li>    <a href="campgrounds/<%= campground._id %>">  <%= campground.title  %>  </a></li>
-    <% } %>
-</ul>
-    <p>
-        <a href="campgrounds/new">Add New Campground</a>
-    </p>
-</body>
-</html>
+<% layout('./layouts/Boilerplate') %>
+
+<h1>All Campgrounds</h1>
+<div class="album py-5">
+    <div class="container">
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
+
+ <% for(let campground of campgrounds) { %> 
+            <div class="col">
+                <div class="card shadow-sm">
+                    <img src="<%= campground.imageUrl %>" alt="">
+                  <div class="card-body">  
+                    <h6 class="text-dark"><%= campground.title  %></h6>
+                    <p class="text-muted"><%= campground.location %></p>
+                    <p class="card-text"><%= campground.description %></p>
+                    <p class="card-text text-info">&dollar;<%= campground.price %></p>
+                    <div class="d-flex justify-content-between align-items-center">
+                      <div class="btn-group">
+                        <a href="/campgrounds/<%= campground._id %>" class="btn btn-sm btn-outline-secondary">View</a>
+                        <a href="/campgrounds/<%= campground._id %>/edit" class="btn btn-sm btn-outline-secondary">Edit</a>
+                      </div>
+                      <small class="text-muted">9 mins</small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <% } %>
+        </div>
+    </div>
+</div>
+
+
+<div class="d-flex align-items-center justify-content-center">
+  <a class="btn btn-info mb-5" href="campgrounds/new">Add New Campground</a>
+
+</div>
