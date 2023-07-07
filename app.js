@@ -5,9 +5,13 @@ const ejs = require('ejs')
 const bodyParser = require('body-parser')
 const methodOverride = require('method-override')
 const ejsMate = require('ejs-mate')
+const Joi = require('joi');
 
 const Campground = require('./models/campground')
 const campground = require('./models/campground')
+const catchAync = require("./utils/catchAsync")
+const AppError = require("./utils/AppError")
+const catchAsync = require('./utils/catchAsync')
 
 
 // express app 
@@ -37,47 +41,75 @@ app.use(bodyParser.json());
 app.use(methodOverride('_method'))
 app.engine('ejs', ejsMate);
 
+
 app.get('/', (req, res)=>{
     res.render('index')
 })
 
-app.get('/campgrounds', async (req, res)=>{
+app.get('/campgrounds', catchAsync(async (req, res)=>{
     const campgrounds = await Campground.find({})
     res.render('campgrounds/index', {campgrounds})
-})
+}))
 
-app.get('/campgrounds/new', async (req, res)=>{
+app.get('/campgrounds/new', catchAsync(async (req, res)=>{
     res.render('campgrounds/new', {campground})
-})
+}))
 
-app.post('/campgrounds', async (req, res) => {
+app.post('/campgrounds', catchAsync(async (req, res) => {
+
+    // joi validation
+    const  campgroundSchema = Joi.object({
+        campground: Joi.object.required({
+            name: Joi.string().required(),
+            price: Joi.number().required().min(0),
+            description: Joi.string().required,
+            location: Joi.string().required,
+            imageUrl: Joi.string().required()
+        })
+    }).required();
+    const result = campgroundSchema.validate(req.body)
+    console.log(result);
+
+    if(!req.body.campground) throw AppError('Invalid Data!!!', 400)
     const camp = new Campground(req.body.campground)
     await camp.save()
     res.redirect(`/campgrounds/${camp._id}`)
-})
+}))
 
-app.get('/campgrounds/:id/edit', async (req, res)=>{
+app.get('/campgrounds/:id/edit', catchAsync(async (req, res)=>{
     const campground = await Campground.findById(req.params.id)
     res.render('campgrounds/edit', {campground})
-})
+}))
 
-app.put('/campgrounds/:id', async (req, res) => {
+app.put('/campgrounds/:id', catchAsync(async (req, res) => {
+    if(!req.body.campground) throw AppError('Invalid Data!!!', 400)
     const camp = await Campground.findByIdAndUpdate(req.params.id, { ...req.body.campground  })
     await camp.save()
     res.redirect(`/campgrounds/${camp._id}`)
-})
+}))
 
-app.delete('/campgrounds/:id', async (req, res) => {
+app.delete('/campgrounds/:id', catchAsync(async (req, res) => {
     await Campground.findByIdAndDelete(req.params.id)
     res.redirect(`/campgrounds`)
-})
+}))
 
-app.get('/campgrounds/:id', async (req, res)=>{
+app.get('/campgrounds/:id', catchAsync(async (req, res)=>{
     const campground = await Campground.findById(req.params.id)
     // res.send(campground)
     res.render('campgrounds/show', {campground})
+}))
+
+app.all('*', (req, res, next) => {
+    res.render('pageNotFound')
 })
  
+app.use((err, req, res, next) => {
+    const { status = 500 } = err;
+    if(!err.message) err.message = "Default Error Message!!!";
+    res.status(status)
+    res.render('errorAlert', {err})
+})
+
 app.listen(5000 , ()=>{  
     console.log("SERVER LISTENING ON PORT 5000")
 })
