@@ -7,6 +7,7 @@ const methodOverride = require('method-override')
 const ejsMate = require('ejs-mate')
 const Joi = require('joi');
 
+const { campgroundSchema } = require('./schemas')
 const Campground = require('./models/campground')
 const campground = require('./models/campground')
 const catchAync = require("./utils/catchAsync")
@@ -42,6 +43,20 @@ app.use(methodOverride('_method'))
 app.engine('ejs', ejsMate);
 
 
+const validateCampgrounds = (req, res, next) => {
+    // joi validation
+    const { error } = campgroundSchema.validate(req.body)
+    if(error){
+        const msg = error.details.map(el => el.message).join(',')
+        console.log(msg)
+        throw new AppError(msg , 400)
+    }
+    else{
+        next()
+    }
+}
+
+
 app.get('/', (req, res)=>{
     res.render('index')
 })
@@ -55,22 +70,8 @@ app.get('/campgrounds/new', catchAsync(async (req, res)=>{
     res.render('campgrounds/new', {campground})
 }))
 
-app.post('/campgrounds', catchAsync(async (req, res) => {
+app.post('/campgrounds',validateCampgrounds , catchAsync(async (req, res) => {
 
-    // joi validation
-    const  campgroundSchema = Joi.object({
-        campground: Joi.object.required({
-            name: Joi.string().required(),
-            price: Joi.number().required().min(0),
-            description: Joi.string().required,
-            location: Joi.string().required,
-            imageUrl: Joi.string().required()
-        })
-    }).required();
-    const result = campgroundSchema.validate(req.body)
-    console.log(result);
-
-    if(!req.body.campground) throw AppError('Invalid Data!!!', 400)
     const camp = new Campground(req.body.campground)
     await camp.save()
     res.redirect(`/campgrounds/${camp._id}`)
@@ -81,7 +82,7 @@ app.get('/campgrounds/:id/edit', catchAsync(async (req, res)=>{
     res.render('campgrounds/edit', {campground})
 }))
 
-app.put('/campgrounds/:id', catchAsync(async (req, res) => {
+app.put('/campgrounds/:id',validateCampgrounds , catchAsync(async (req, res) => {
     if(!req.body.campground) throw AppError('Invalid Data!!!', 400)
     const camp = await Campground.findByIdAndUpdate(req.params.id, { ...req.body.campground  })
     await camp.save()
